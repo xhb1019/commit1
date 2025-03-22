@@ -88,22 +88,10 @@ static int add_if_label(uint32_t input_line, char* str, uint32_t byte_offset,
                         SymbolTable* symtbl) {
   /* IMPLEMENT ME */
   /* === start === */
-  size_t len = strlen(str);
-  if (str[len - 1] == ':') {
-      str[len - 1] = '\0';
-      if (is_valid_label(str)) {
-          if (add_to_table(symtbl, str, byte_offset) == 0) {
-              return 1;
-          } else {
-              return -1;
-          }
-      } else {
-          raise_label_error(input_line, str);
-          return -1;
-      }
-  } else {
-      return 0;
-  }
+  
+
+  /* === end === */
+  return 0;
 }
 
 /*******************************
@@ -143,61 +131,29 @@ static int add_if_label(uint32_t input_line, char* str, uint32_t byte_offset,
    encountered, it should return 0.
  */
 int pass_one(FILE* input, Block* blk, SymbolTable* table) {
+  /* A buffer for line parsing. */
   char buf[BUF_SIZE];
+
+  /* Variables for argument parsing. */
+  char* args[MAX_ARGS];
   uint32_t offset = 0;
   int error = 0;
-  uint32_t line_number = 0;
+  /* For each line, there are some hints of what you should do:
+      1. Skip all comments
+      (see the function 'static void skip_comments(char* str)')
+      2. Use `strtok()` to read the next token
+      3. Handle labels
+      4. Parse the instruction
+ */
 
   while (fgets(buf, BUF_SIZE, input)) {
+    /* IMPLEMENT ME */
     /* === start === */
-    line_number++;
-    skip_comments(buf); // 去除注释
     
-    char* line = buf;
-    while (*line 
-    ) line++; // 跳过行首空白
-    
-    if (*line == '\0') continue; // 空行
-    
-    // 处理标签
-    char* token = strtok(line, IGNORE_CHARS);
-    int label_status = add_if_label(line_number, token, offset, table);
-    
-    if (label_status == 1) { // 成功添加标签
-      token = strtok(NULL, IGNORE_CHARS); // 继续解析指令
-    } else if (label_status == -1) { // 标签错误
-      error = 1;
-      token = NULL;
-    }
-    
-    if (!token) continue; // 只有标签无指令
-    
-    // 解析指令名称和参数
-    char* name = token;
-    char* args[MAX_ARGS];
-    int num_args = 0;
-    
-    while ((token = strtok(NULL, IGNORE_CHARS)) && num_args < MAX_ARGS) {
-      args[num_args++] = token;
-    }
-    
-    // 检查额外参数
-    if (token) {
-      raise_extra_argument_error(line_number, token);
-      error = 1;
-      continue;
-    }
-    
-    // 写入中间表示
-    if (write_pass_one(blk, name, args, num_args) == 0) {
-      error = 1;
-      raise_instruction_error(line_number, name, args, num_args);
-    }
-    
-    offset += 4; // 每条指令占4字节
+
     /* === end === */
   }
-  return error ? -1 : 0;
+  return 0;
 }
 
 /* Second pass of the assembler.
@@ -232,23 +188,12 @@ int pass_two(Block* blk, SymbolTable* table, FILE* output) {
     Instr* inst = &blk->entries[i];
     /* IMPLEMENT ME */
     /* === start === */
-    const char* name = inst->name;
-    char** args = inst->args;
-    int num_args = inst->arg_num;
-    uint32_t addr = i * 4; // 计算指令地址（每条占4字节）
-
-    // 调用翻译函数
-    int result = translate_inst(output, name, args, num_args, addr, table);
-
-    if (result != 0) { // 翻译失败
-      raise_instruction_error(inst->line_number, name, args, num_args);
-      error = 1; // 标记错误但不中断处理
-    }
+    
     
     /* === end === */
   }
 
-  return error ? -1 : 0; // 返回最终状态
+  return 0;
 }
 
 static void close_files(int count, ...) {
