@@ -88,24 +88,23 @@ static const InstrInfo instr_table[] = {
     {"jal", UJ_TYPE, 0x6f, 0x0, 0x00, IMM_21_SIGNED},
 };
 
-/* beqz rs,label → beq rs,x0,label */
 unsigned transform_beqz(Block* blk, char** args, int num_args) {
-  if (num_args != 2) return 0;
-  char* new_args[] = {args[0], "x0", args[1]};
-  return add_to_block(blk, "beq", new_args, 3);
+  /* IMPLEMENT ME */
+  /* === start === */
+  
 
+
+  /* === end === */
+  return 0;
 }
-
 
 unsigned transform_bnez(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 2) return 0;
-    char* new_args[] = {args[0], "x0", args[1]};
-    return add_to_block(blk, "bne", new_args, 3);
+  
   /* === end === */
   return 0;
-} 
+}
 
 /* Hint:
   - make sure that the number is representable by 32 bits. (Hint: the number
@@ -121,23 +120,7 @@ unsigned transform_bnez(Block* blk, char** args, int num_args) {
 unsigned transform_li(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 2) return 0;
-    
-  long imm;
-  if (translate_num(&imm, args[1], IMM_12_SIGNED) == 0) {
-      char* addi_args[] = {args[0], "x0", args[1]};
-      return add_to_block(blk, "addi", addi_args, 3);
-  } else {
-      // 处理大立即数：lui + addi
-      char upper[32], lower[32];
-      snprintf(upper, sizeof(upper), "%ld", (imm + 0x800) >> 12);
-      snprintf(lower, sizeof(lower), "%ld", imm & 0xFFF);
-      
-      char* lui_args[] = {args[0], upper};
-      char* addi_args[] = {args[0], args[0], lower};
-      return add_to_block(blk, "lui", lui_args, 2) +
-             add_to_block(blk, "addi", addi_args, 3);
-  }
+
   /* === end === */
   return 0;
 }
@@ -148,9 +131,7 @@ unsigned transform_li(Block* blk, char** args, int num_args) {
 unsigned transform_mv(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 2) return 0;
-    char* new_args[] = {args[0], args[1], "0"};
-    return add_to_block(blk, "addi", new_args, 3);
+  
   
 
   /* === end === */
@@ -160,9 +141,7 @@ unsigned transform_mv(Block* blk, char** args, int num_args) {
 unsigned transform_j(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 1) return 0;
-  char* new_args[] = {"x0", args[0]};
-  return add_to_block(blk, "jal", new_args, 2);
+  
 
   /* === end === */
   return 0;
@@ -171,9 +150,7 @@ unsigned transform_j(Block* blk, char** args, int num_args) {
 unsigned transform_jr(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 1) return 0;
-  char* new_args[] = {"x0", args[0], "0"};
-  return add_to_block(blk, "jalr", new_args, 3);
+  
 
   /* === end === */
   return 0;
@@ -186,9 +163,7 @@ unsigned transform_jr(Block* blk, char** args, int num_args) {
 unsigned transform_jal(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 1) return 0;
-  char* new_args[] = {"x1", args[0]};
-  return add_to_block(blk, "jal", new_args, 2);
+  
   
 
   /* === end === */
@@ -202,9 +177,7 @@ unsigned transform_jal(Block* blk, char** args, int num_args) {
 unsigned transform_jalr(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 1) return 0;
-  char* new_args[] = {"x1", args[0], "0"};
-  return add_to_block(blk, "jalr", new_args, 3);
+  
   
 
   /* === end === */
@@ -217,8 +190,7 @@ unsigned transform_jalr(Block* blk, char** args, int num_args) {
 unsigned transform_lw(Block* blk, char** args, int num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 2) return 0;
-  return add_to_block(blk, "lw", args, num_args);
+  
   /* === end === */
   return 0;
 }
@@ -261,7 +233,7 @@ unsigned write_pass_one(Block* blk, const char* name, char** args,
   /* What about general instructions? */
   /* IMPLEMENT ME */
   /* === start === */
-  return add_to_block(blk, name, args, num_args);
+
 
   
   /* === end === */
@@ -324,15 +296,7 @@ int write_rtype(FILE* output, const InstrInfo* info, char** args,
   /* IMPLEMENT ME */
   /* === start === */
   
-  if (num_args != 3) return -1;
-    
-  int rd = translate_reg(args[0]);
-  int rs1 = translate_reg(args[1]);
-  int rs2 = translate_reg(args[2]);
-  if (rd < 0 || rs1 < 0 || rs2 < 0) return -1;
   
-  uint32_t instr = (info->funct7 << 25) | (rs2 << 20) | (rs1 << 15) | (info->funct3 << 12) | (rd << 7) | info->opcode;
-  write_inst_hex(output, instr);
 
   /* === end === */
   return 0;
@@ -351,26 +315,6 @@ int write_itype(FILE* output, const InstrInfo* info, char** args,
   /* === start === */
   
   /* === end === */
-  if (num_args != (info->imm_type == IMM_NONE ? 2 : 3)) return -1;
-    
-  // 解析立即数或标签
-  long imm = 0;
-  if (info->imm_type != IMM_NONE) {
-      if (translate_num(&imm, args[2], info->imm_type) != 0) {
-          // 处理标签
-          int64_t target = get_addr_for_symbol(symtbl, args[2]);
-          if (target < 0) return -1;
-          imm = (int64_t)target - addr;
-      }
-  }
-  
-  int rd = translate_reg(args[0]);
-  int rs1 = translate_reg(args[1]);
-  if (rd < 0 || rs1 < 0) return -1;
-  
-  uint32_t imm12 = (imm & 0xFFF) << 20;
-  uint32_t instr = imm12 | (rs1 << 15) | (info->funct3 << 12) | (rd << 7) | info->opcode;
-  write_inst_hex(output, instr);
   return 0;
 }
 
@@ -378,19 +322,7 @@ int write_stype(FILE* output, const InstrInfo* info, char** args,
                 size_t num_args) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 3) return -1;
-    
-    long imm;
-    if (translate_num(&imm, args[2], info->imm_type) != 0) return -1;
-    
-    int rs1 = translate_reg(args[1]);
-    int rs2 = translate_reg(args[0]); // 注意S-type顺序
-    if (rs1 < 0 || rs2 < 0) return -1;
-    
-    uint32_t imm_11_5 = (imm & 0xFE0) << 20;
-    uint32_t imm_4_0 = (imm & 0x1F) << 7;
-    uint32_t instr = imm_11_5 | (rs2 << 20) | (rs1 << 15) | (info->funct3 << 12) | imm_4_0 | info->opcode;
-    write_inst_hex(output, instr);
+  
 
   /* === end === */
   return 0;
@@ -410,25 +342,7 @@ int write_sbtype(FILE* output, const InstrInfo* info, char** args,
                  size_t num_args, uint32_t addr, SymbolTable* symtbl) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 3) return -1;
-    
-    int64_t target = get_addr_for_symbol(symtbl, args[2]);
-    if (target < 0) return -1;
-    int32_t offset = (target - addr);
-    
-    int rs1 = translate_reg(args[0]);
-    int rs2 = translate_reg(args[1]);
-    if (rs1 < 0 || rs2 < 0) return -1;
-    
-    // 编码立即数（13位符号扩展）
-    uint32_t imm12 = (offset & 0x1000) << 19;
-    uint32_t imm10_5 = (offset & 0xFC0) << 20;
-    uint32_t imm4_1 = (offset & 0x1E) << 7;
-    uint32_t imm11 = (offset & 0x800) >> 4;
-    
-    uint32_t imm = imm12 | imm10_5 | imm4_1 | imm11;
-    uint32_t instr = imm | (rs2 << 20) | (rs1 << 15) | (info->funct3 << 12) | info->opcode;
-    write_inst_hex(output, instr);
+  
   
 
   /* === end === */
@@ -444,26 +358,10 @@ int write_utype(FILE* output, const InstrInfo* info, char** args,
                 size_t num_args, uint32_t addr, SymbolTable* symtbl) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != (info->imm_type == IMM_NONE ? 2 : 3)) return -1;
-    
-  // 解析立即数或标签
-  long imm = 0;
-  if (info->imm_type != IMM_NONE) {
-      if (translate_num(&imm, args[2], info->imm_type) != 0) {
-          // 处理标签
-          int64_t target = get_addr_for_symbol(symtbl, args[2]);
-          if (target < 0) return -1;
-          imm = (int64_t)target - addr;
-      }
-  }
   
-  int rd = translate_reg(args[0]);
-  int rs1 = translate_reg(args[1]);
-  if (rd < 0 || rs1 < 0) return -1;
   
-  uint32_t imm12 = (imm & 0xFFF) << 20;
-  uint32_t instr = imm12 | (rs1 << 15) | (info->funct3 << 12) | (rd << 7) | info->opcode;
-  write_inst_hex(output, instr);
+
+  /* === end === */
   return 0;
 }
 
@@ -473,24 +371,8 @@ int write_ujtype(FILE* output, const InstrInfo* info, char** args,
                  size_t num_args, uint32_t addr, SymbolTable* symtbl) {
   /* IMPLEMENT ME */
   /* === start === */
-  if (num_args != 2) return -1;
-    
-    int64_t target = get_addr_for_symbol(symtbl, args[1]);
-    if (target < 0) return -1;
-    int32_t offset = (target - addr);
-    
-    int rd = translate_reg(args[0]);
-    if (rd < 0) return -1;
-    
-    // 编码21位立即数
-    uint32_t imm20 = (offset & 0x100000) << 11;
-    uint32_t imm10_1 = (offset & 0x7FE) << 20;
-    uint32_t imm11 = (offset & 0x800) << 9;
-    uint32_t imm19_12 = (offset & 0xFF000);
-    
-    uint32_t imm = imm20 | imm10_1 | imm11 | imm19_12;
-    uint32_t instr = imm | (rd << 7) | info->opcode;
-    write_inst_hex(output, instr);
+  
   /* === end === */
   return 0;
 }
+
